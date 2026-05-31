@@ -141,8 +141,8 @@ All resources use AWS Free Tier:
 
 ## Author
 
-- Name: [Your Full Name]
-- Student ID: [Your ID]
-- University: [Your University]
-- Course: Cloud Computing / DevOps
+- Name: [Zahid Bashir]
+- Student ID: [55428]
+- University: [Riphah international university]
+- Course: Cloud Computing 
 - Year: 2026
