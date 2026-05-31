@@ -1,0 +1,29 @@
+# ============================================================
+# service.yaml
+# Kubernetes Service (NodePort) for Node.js App
+# NodePort exposes the app on EC2's public IP
+# ============================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: nodejs-service
+  labels:
+    app: nodejs-app
+    project: university-k8s
+spec:
+  # NodePort: makes the service accessible from OUTSIDE the cluster
+  # via EC2_PUBLIC_IP:nodePort
+  type: NodePort
+
+  selector:
+    # Must match the pod labels in deployment.yaml
+    app: nodejs-app
+
+  ports:
+    - name: http
+      protocol: TCP
+      port: 80          # Service port (internal cluster traffic)
+      targetPort: 3000  # Container port (where app listens)
+      nodePort: 30080   # External port on EC2 node (30000-32767 range)
+                        # Access via: http://EC2_PUBLIC_IP:30080

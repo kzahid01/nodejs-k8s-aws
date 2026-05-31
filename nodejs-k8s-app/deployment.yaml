@@ -1,0 +1,78 @@
+# ============================================================
+# deployment.yaml
+# Kubernetes Deployment for Node.js App
+# University Project - AWS EC2 + Minikube
+# ============================================================
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nodejs-app
+  labels:
+    app: nodejs-app
+    project: university-k8s
+spec:
+  # 2 replicas for the scaling demo (Phase 11)
+  replicas: 2
+
+  # Selector must match the pod template labels below
+  selector:
+    matchLabels:
+      app: nodejs-app
+
+  # Rolling update: replace pods gradually, no downtime
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1        # allow 1 extra pod during update
+      maxUnavailable: 0  # never kill a pod before new one is ready
+
+  template:
+    metadata:
+      labels:
+        app: nodejs-app
+    spec:
+      containers:
+        - name: nodejs-app
+          # IMPORTANT: Replace with your actual ECR image URL
+          # Format: <account-id>.dkr.ecr.<region>.amazonaws.com/nodejs-k8s-app:latest
+          image: YOUR_ECR_IMAGE_URL:latest
+          imagePullPolicy: Always
+
+          ports:
+            - containerPort: 3000
+
+          # Environment variables passed into the container
+          env:
+            - name: PORT
+              value: "3000"
+            - name: APP_VERSION
+              value: "1.0.0"
+
+          # Resource limits — CRITICAL for t2.micro (1GB RAM, 1 vCPU)
+          # Keeps Minikube stable with 2 pods running
+          resources:
+            requests:
+              memory: "64Mi"    # minimum memory guaranteed
+              cpu: "50m"        # 50 millicores = 0.05 CPU core
+            limits:
+              memory: "128Mi"   # maximum memory allowed
+              cpu: "200m"       # maximum 0.2 CPU core
+
+          # Liveness probe: Kubernetes restarts pod if this fails
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+
+          # Readiness probe: pod only receives traffic when this passes
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 3
